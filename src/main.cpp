@@ -91,6 +91,7 @@ void input_thread(MCControlNAOqi & controlNAOqi)
     ss << ui;
     std::string token;
     ss >> token;
+    mc_rtc::log::info("Got input: {}", token);
     /* Start the controller (if not started), stop otwerwise */
     if(token == "s")
     {

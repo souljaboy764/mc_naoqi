@@ -349,7 +349,9 @@ void MCControlNAOqi::sensor_thread()
 
     /* Get all sensor readings from the robot */
     sensors_ = MCNAOqiDCM_.call<std::vector<float>>("getSensors");
-
+    double elapsed_time = std::chrono::duration<double>(std::chrono::high_resolution_clock::now() - start).count();
+    mc_rtc::log::warning("[getSensors] getSensors done in {} ms", elapsed_time * 1000);
+    
     /* Process the sensor readings common to bith robots */
     /* Encoder values */
     const auto & ref_joint_order = globalController_.robot().refJointOrder();
@@ -516,8 +518,6 @@ void MCControlNAOqi::servo(const bool state)
 {
   if(host_ != "simulation")
   {
-    bool isConnected2DCM = MCNAOqiDCM_.call<bool>("isPreProccessConnected");
-
     if(state) // Servo ON
     {
       mc_rtc::log::warning("Turning ON the motors");
@@ -544,13 +544,6 @@ void MCControlNAOqi::servo(const bool state)
           std::cout << "Try going to http://your_robot_ip/advanced/#/settings to enable the deactivation first"
                     << std::endl;
         }
-      }
-
-      /* Connect the mc_rtc joint update callback to robot's DCM loop */
-      if(!isConnected2DCM)
-      {
-        MCNAOqiDCM_.call<void>("startLoop");
-        mc_rtc::log::info("Connected to DCM loop");
       }
 
       /* If controller is not running, set joint angle commands to current joint state from encoders */
@@ -619,13 +612,6 @@ void MCControlNAOqi::servo(const bool state)
           MCNAOqiDCM_.call<void>("bumperSafetyReflex", !wheelsOffOnBumperPressedState_);
           wheelsOffOnBumperPressedState_ = !wheelsOffOnBumperPressedState_;
         }
-      }
-
-      /* Disconnect the mc_rtc joint update callback from robot's DCM loop */
-      if(isConnected2DCM)
-      {
-        MCNAOqiDCM_.call<void>("stopLoop");
-        mc_rtc::log::info("Disconnected from DCM loop");
       }
 
       /* Re-activate safety reflexes */
