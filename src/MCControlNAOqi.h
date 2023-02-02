@@ -56,16 +56,6 @@ struct MCControlNAOqi
   void servo(const bool state);
 
   /**
-   * @brief Set the wheels stiffness to max value or switch off
-   * Connect a preproccess callback to DCM loop
-   *
-   * @param state
-   *  true: Turn on the wheels actuators
-   *  false: Turn off the wheels actuators
-   */
-  void wheelsServo(const bool state);
-
-  /**
    * @brief Return a reference to the global mc_rtc controller
    */
   mc_control::MCGlobalController & controller()
@@ -101,21 +91,11 @@ private:
   bool servoState_ = false;
   std::string servoButtonText_ = "Motors ON/OFF";
 
-  /*! Wheels servo on/off */
-  bool wheelsServoState_ = false;
-  std::string wheelsServoButtonText_ = "Wheels ON/OFF";
-
   /* Sensor information */
   /*! Encoder values */
   std::vector<double> qIn_;
   /*! ElectricCurrent values */
   std::vector<double> tauIn_;
-  /*! Orientation sensor */
-  Eigen::Vector3d rpyIn_;
-  /*! Accelerometer */
-  Eigen::Vector3d accIn_;
-  /*! Angular velocity */
-  Eigen::Vector3d rateIn_;
 
   /* Connection information */
   /*! Connection host */
@@ -129,8 +109,6 @@ private:
   qi::SessionPtr ALBroker_;
   /*! Custom DCM module for fast access to NAOqi memory and actuators */
   qi::AnyObject MCNAOqiDCM_;
-  /*! Tables service (Pepper only) */
-  qi::AnyObject ALTabletservice_;
   /*! ALLauncher module (check if needed modules are present on robot) */
   qi::AnyObject ALlauncher_;
 
@@ -147,46 +125,6 @@ private:
   std::vector<float> sensors_;
   /*! Total number of sensors */
   int numSensors_;
-  /*! Use robot IMU sensor */
-  bool useRobotIMU_ = false;
-
-  /*! Eye blinking ability */
-  // note: enabling ALAutonomousBlinking works in interactive mode only
-  bool blinking_ = true;
-  int msTillBlink_;
-
-  /*! Enable talking */
-  bool talking_ = true;
-
-  /*! Mobile base control (Pepper only) */
-  bool moveMobileBase_ = false;
-  double wheelRadius_ = 0.07; // m
-  Eigen::Matrix3d wheelsJacobian_;
-  Eigen::Vector3d mobileBaseSpeedCommand_;
-  Eigen::Vector3d wheelsSpeedCommand_;
-
-  /* Bumper names */
-  std::vector<std::string> bumpers_;
-
-  /* Tactile sensor names */
-  std::vector<std::string> tactiles_;
-
-  /* Enable or disable custom safety reflex */
-  bool wheelsOffOnBumperPressed_ = true;
-  bool wheelsOffOnBumperPressedState_ = false;
-
-  /* Name of the speakers device in mc_rtc RobotModule */
-  std::string speakerDeviceName_ = "Speakers";
-  /* Prevent sending commands to speakers in every iteration */
-  double speakerBlockTimer_ = 3.0; // s
-  bool speakerBlockTimerActive_ = false;
-
-  /* Name of the visual display device in mc_rtc RobotModule */
-  std::string displayDeviceName_ = "Tablet";
-  bool enableVisualDisplay_ = true;
-  /* Prevent sending commands to tablet in every iteration */
-  double displayBlockTimer_ = 3.0; // s
-  bool displayBlockTimerActive_ = false;
 };
 
 } // namespace mc_naoqi

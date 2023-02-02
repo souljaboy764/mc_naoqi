@@ -6,13 +6,6 @@ Enabled: Posture
 # Controller timestep (s)
 Timestep: 0.012
 
-# Interface specific parameters (mc_naoqi)
-UseRobotIMU: false
-Blinking: true
-Talking: true
-# Uncomment line below to enable mobile base movements
-MoveMobileBase: true
-
 # Load and run state observers.
 ObserverPipelines:
   name: "PepperObserver"
