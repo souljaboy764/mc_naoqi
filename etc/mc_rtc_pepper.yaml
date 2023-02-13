@@ -2,7 +2,7 @@
 # What robot is being controlled
 MainRobot: Pepper
 # Enabled controllers
-Enabled: Posture
+Enabled: MyFirstController
 # Controller timestep (s)
 Timestep: 0.012
 
