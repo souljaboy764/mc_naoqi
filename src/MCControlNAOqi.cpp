@@ -51,6 +51,7 @@ MCControlNAOqi::MCControlNAOqi(mc_control::MCGlobalController & controller,
 
 		/* Connect to local robot modules */
 		MCNAOqiDCM_ = ALBroker_->service("MCNAOqiDCM");
+		ALlauncher_ = ALBroker_->service("ALLauncher");
 		/* Check that controller main robot and real robot are of the same type */
 		std::string realRobotName = MCNAOqiDCM_.call<std::string>("getRobotName");
 		if(realRobotName != globalController_.robot().name())
@@ -209,8 +210,8 @@ void MCControlNAOqi::sensor_thread()
 
 		/* Get all sensor readings from the robot */
 		sensors_ = MCNAOqiDCM_.call<std::vector<float>>("getSensors");
-		double elapsed_time = std::chrono::duration<double>(std::chrono::high_resolution_clock::now() - start).count();
-		mc_rtc::log::warning("[getSensors] getSensors done in {} ms", elapsed_time * 1000);
+		// double elapsed_time = std::chrono::duration<double>(std::chrono::high_resolution_clock::now() - start).count();
+		// mc_rtc::log::warning("[getSensors] getSensors done in {} ms", elapsed_time * 1000);
 		
 		/* Process the sensor readings common to bith robots */
 		/* Encoder values */
@@ -238,7 +239,7 @@ void MCControlNAOqi::sensor_thread()
 		double elapsed = std::chrono::duration<double>(std::chrono::high_resolution_clock::now() - start).count();
 		if(elapsed * 1000 > timestep_)
 		{
-			mc_rtc::log::warning("[Sensors] Loop time {} exeeded timestep {} ms", elapsed * 1000, timestep_);
+			// mc_rtc::log::warning("[Sensors] Loop time {} exeeded timestep {} ms", elapsed * 1000, timestep_);
 		}
 		// else if(timestep_ - elapsed > timestep_ / 2.0 && blinking_)
 		// {
@@ -266,6 +267,7 @@ void MCControlNAOqi::servo(const bool state)
 {
 	if(host_ != "simulation")
 	{
+		bool isConnected2DCM = MCNAOqiDCM_.call<bool>("isPreProccessConnected");
 		if(state) // Servo ON
 		{
 			mc_rtc::log::warning("Turning ON the motors");
@@ -292,6 +294,13 @@ void MCControlNAOqi::servo(const bool state)
 					std::cout << "Try going to http://your_robot_ip/advanced/#/settings to enable the deactivation first"
 										<< std::endl;
 				}
+			}
+
+			/* Connect the mc_rtc joint update callback to robot's DCM loop */
+			if(!isConnected2DCM)
+			{
+				MCNAOqiDCM_.call<void>("startLoop");
+				mc_rtc::log::info("Connected to DCM loop");
 			}
 
 			/* If controller is not running, set joint angle commands to current joint state from encoders */
@@ -326,6 +335,14 @@ void MCControlNAOqi::servo(const bool state)
 				MCNAOqiDCM_.call<void>("setStiffness", 1.0 - i / 100.);
 				std::this_thread::sleep_for(std::chrono::milliseconds(10));
 			}
+
+			/* Disconnect the mc_rtc joint update callback from robot's DCM loop */
+			if(isConnected2DCM)
+			{
+				MCNAOqiDCM_.call<void>("stopLoop");
+				mc_rtc::log::info("Disconnected from DCM loop");
+			}
+
 
 			/* Re-activate safety reflexes */
 			if(ALlauncher_.call<bool>("isModulePresent", "ALMotion"))

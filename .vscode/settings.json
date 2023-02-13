@@ -1,5 +1,16 @@
 {
     "files.associations": {
-        "stdexcept": "cpp"
-    }
+        "stdexcept": "cpp",
+        "iosfwd": "cpp",
+        "chrono": "cpp"
+    },
+    "cmake.configureArgs": [
+        "-DCMAKE_PREFIX_PATH=$HOME/mc_playground/local"
+    ],
+    "cmake.installPrefix":"${env:HOME}/mc_playground/local",
+    "cmake.buildArgs": [
+        "-j",
+        "16"
+    ],
+    "cmake.configureOnOpen": false
 }
