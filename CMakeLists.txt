@@ -8,7 +8,7 @@ set(PROJECT_DESCRIPTION mc_naoqi)
 set(PROJECT_URL https://github.com/jrl-umi3218/mc_naoqi)
 set(PROJECT_DEBUG_POSTFIX "_d")
 set(CMAKE_BUILD_TYPE Release)
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 17)
 add_definitions(-w)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
