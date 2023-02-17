@@ -83,6 +83,7 @@ std::map<std::string, std::function<bool(mc_control::MCGlobalController &, std::
 /* Thread that processes commands for the inferface given throught the terminal */
 void input_thread(MCControlNAOqi & controlNAOqi)
 {
+  controlNAOqi.servo(true);
   while(controlNAOqi.running())
   {
     std::string ui;

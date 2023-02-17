@@ -14,7 +14,7 @@ target_link_libraries(mc_naoqi Boost::thread)
 target_link_libraries(mc_naoqi mc_rtc::mc_control)
 target_link_libraries(mc_naoqi mc_pepper::devices)
 target_link_libraries(mc_naoqi qi::qi)
-target_link_libraries(mc_naoqi crypto ssl)
+target_link_libraries(mc_naoqi crypto ssl tbb python3.8)
 
 
 install(TARGETS mc_naoqi

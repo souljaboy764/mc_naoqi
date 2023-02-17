@@ -68,6 +68,8 @@ private:
   bool controllerStartedState_ = false;
   std::string controllerButtonText_ = "Start/Stop controller";
 
+  std::vector<float> default_angles = {M_PI_2, 0.15, -M_PI_2, -0.009, 0., 0.5, M_PI_2, -0.15, M_PI_2, 0.009, 0., 0.5};
+
   /**
    * @brief Thread that sends mc_rtc controller commands to the robot.
    */
@@ -97,6 +99,10 @@ private:
   /*! ElectricCurrent values */
   std::vector<double> tauIn_;
 
+  
+  /** reference joint order for the robot */
+  std::vector<std::string> ref_joint_order;
+
   /* Connection information */
   /*! Connection host */
   std::string host_;
@@ -109,6 +115,8 @@ private:
   qi::SessionPtr ALBroker_;
   /*! Custom DCM module for fast access to NAOqi memory and actuators */
   qi::AnyObject MCNAOqiDCM_;
+  /*! Custom DCM module for ALMotion API */
+  qi::AnyObject ALMotion;
   /*! ALLauncher module (check if needed modules are present on robot) */
   qi::AnyObject ALlauncher_;
 
