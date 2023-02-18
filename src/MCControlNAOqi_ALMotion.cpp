@@ -188,12 +188,12 @@ void MCControlNAOqi::control_thread()
 				// Send actuator commands to the robot 
 				if(host_ != "simulation")
 				{
-					/* std::vector<std::vector<double>> target = globalController_.controller().postureTask->posture();
+					std::vector<std::vector<double>> target = globalController_.controller().postureTask->posture();
 					mc_rtc::log::info("MCControlNAOqi setAngles: {:4f} {:4f} {:4f} {:4f} {:4f}", angles[6], angles[7], angles[8], angles[9], angles[10]);
 					mc_rtc::log::info("MCControlNAOqi setTarget: {:4f} {:4f} {:4f} {:4f} {:4f}", target[29][0], target[30][0], target[31][0], target[32][0], target[33][0]);
 					mc_rtc::log::info("MCControlNAOqi sensors Vals: {:4f} {:4f} {:4f} {:4f} {:4f}", sensors_[6], sensors_[7], sensors_[8], sensors_[9], sensors_[10]);
 					mc_rtc::log::info("MCControlNAOqi Difference: {:4e}", (std::abs(target[29][0] - sensors_[6]) + std::abs(target[30][0] - sensors_[7]) + std::abs(target[31][0] - sensors_[8]) + std::abs(target[32][0] - sensors_[9]) + std::abs(target[33][0] - sensors_[10]))/5.);
-					*/
+					
 					// MCNAOqiDCM_.call<void>("setJointAngles", angles);
 					ALMotion.call<void>("setAngles", qi::AnyValue::from<std::vector<std::string>>(globalController_.robot().refJointOrder()), qi::AnyValue::from<std::vector<float>>(angles), qi::AnyValue::from<float>(0.7));
 				}
@@ -212,7 +212,8 @@ void MCControlNAOqi::control_thread()
 		}
 		else
 		{
-			std::this_thread::sleep_for(std::chrono::milliseconds(timestep_ - static_cast<unsigned int>(elapsed * 1000)));
+			// std::this_thread::sleep_for(std::chrono::milliseconds(timestep_ - static_cast<unsigned int>(elapsed * 1000)));
+			qi::os::sleep(timestep_/1000 - static_cast<unsigned int>(elapsed));
 		}
 	}
 	mc_rtc::log::info("MCControlNAOqi running thread stopped");
@@ -249,7 +250,8 @@ void MCControlNAOqi::sensor_thread()
 		}
 		else
 		{
-			std::this_thread::sleep_for(std::chrono::milliseconds(timestep_ - static_cast<unsigned int>(elapsed * 1000)));
+			// std::this_thread::sleep_for(std::chrono::milliseconds(timestep_ - static_cast<unsigned int>(elapsed * 1000)));
+			qi::os::sleep(timestep_/1000 - static_cast<unsigned int>(elapsed));
 		}
 	}
 }
@@ -262,17 +264,17 @@ void MCControlNAOqi::servo(const bool state)
 		if(state) // Servo ON
 		{
 			mc_rtc::log::warning("Turning ON the motors");
-			/* // Deactivate safety reflexes if ALMotion module is running
+			// Deactivate safety reflexes if ALMotion module is running
 			if(ALlauncher_.call<bool>("isModulePresent", "ALMotion"))
 			{
 				mc_rtc::log::info("ALMotion module is active on the robot. Disabling safety reflexes...");
 				try
 				{
-					ALMotion.call<bool>("setCollisionProtectionEnabled", "Arms", false);
+					// ALMotion.call<bool>("setCollisionProtectionEnabled", "Arms", false);
 					ALMotion.call<void>("setDiagnosisEffectEnabled", false);
 					ALMotion.call<void>("setSmartStiffnessEnabled", false);
-					ALMotion.call<void>("setExternalCollisionProtectionEnabled", "All", false);
-					ALMotion.call<void>("setFallManagerEnabled", false);
+					// ALMotion.call<void>("setExternalCollisionProtectionEnabled", "All", false);
+					// ALMotion.call<void>("setFallManagerEnabled", false);
 					if(globalController_.robot().name() == "pepper")
 					{
 						ALMotion.call<void>("setPushRecoveryEnabled", false);
@@ -284,7 +286,7 @@ void MCControlNAOqi::servo(const bool state)
 					std::cout << "Try going to http://your_robot_ip/advanced/#/settings to enable the deactivation first"
 										<< std::endl;
 				}
-			} */
+			}
 
 			// Connect the mc_rtc joint update callback to robot's DCM loop 
 			/* if(!isConnected2DCM)
@@ -312,9 +314,11 @@ void MCControlNAOqi::servo(const bool state)
 			{
 				// MCNAOqiDCM_.call<void>("setStiffness", i / 100.);
 				ALMotion.call<void>("setStiffnesses", qi::AnyValue::from<std::string>("Body"), qi::AnyValue::from<float>(0.8*i/100));
-				std::this_thread::sleep_for(std::chrono::milliseconds(10));
+				// std::this_thread::sleep_for(std::chrono::milliseconds(10));
+				qi::os::sleep(0.01);
 			}
-			std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+			// std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+			qi::os::sleep(1);
 			
 			ALMotion.call<void>("setAngles", 
 				qi::AnyValue::from<std::vector<std::string>>(globalController_.robot().refJointOrder()), 
@@ -335,13 +339,15 @@ void MCControlNAOqi::servo(const bool state)
 				qi::AnyValue::from<std::vector<float>>(default_angles),
 				qi::AnyValue::from<float>(0.5)
 			);
-			std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+			// std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+			qi::os::sleep(1);
 			// Gradually decrease stiffness over 1s to prevent jerky motion 
 			for(int i = 1; i <= 100; ++i)
 			{
 				// MCNAOqiDCM_.call<void>("setStiffness", 1.0 - i / 100.);
 				ALMotion.call<void>("setStiffnesses", qi::AnyValue::from<std::string>("Body"), qi::AnyValue::from<float>(0.8*(1-i/100)));
-				std::this_thread::sleep_for(std::chrono::milliseconds(10));
+				// std::this_thread::sleep_for(std::chrono::milliseconds(10));
+				qi::os::sleep(0.01);
 			}
 
 			// Disconnect the mc_rtc joint update callback from robot's DCM loop 
@@ -352,21 +358,21 @@ void MCControlNAOqi::servo(const bool state)
 			} */
 
 
-			/* // Re-activate safety reflexes 
+			// Re-activate safety reflexes 
 			if(ALlauncher_.call<bool>("isModulePresent", "ALMotion"))
 			{
 				mc_rtc::log::info("ALMotion module is active on the robot. Re-activating safety reflexes...");
-				ALMotion.call<bool>("setCollisionProtectionEnabled", "Arms", true);
+				// ALMotion.call<bool>("setCollisionProtectionEnabled", "Arms", true);
 				ALMotion.call<void>("setDiagnosisEffectEnabled", true);
 				ALMotion.call<void>("setSmartStiffnessEnabled", true);
-				ALMotion.call<void>("setExternalCollisionProtectionEnabled", "All", true);
-				ALMotion.call<void>("setFallManagerEnabled", true);
+				// ALMotion.call<void>("setExternalCollisionProtectionEnabled", "All", true);
+				// ALMotion.call<void>("setFallManagerEnabled", true);
 				if(globalController_.robot().name() == "pepper")
 				{
 					ALMotion.call<void>("setPushRecoveryEnabled", true);
 				}
 				mc_rtc::log::info("Safety reflexes reactivated");
-			} */
+			}
 			servoState_ = false;
 			servoButtonText_ = "Motors ON";
 			mc_rtc::log::warning("Motors OFF");

@@ -1,6 +1,7 @@
 set ( SOURCES
  main.cpp
- MCControlNAOqi.cpp
+ MCControlNAOqi_ALMotion.cpp
+#  MCControlNAOqi_DCM.cpp
 )
 
 set ( HEADERS

@@ -269,6 +269,7 @@ void MCControlNAOqi::servo(const bool state)
 					{
 						al_motion.call<void>("setPushRecoveryEnabled", false);
 					}
+					// al_motion.call<void>("setStiffnesses", qi::AnyValue::from<std::string>("Body"), qi::AnyValue::from<float>(0.8*(1-i/100)));
 				}
 				catch(const std::exception & e)
 				{
@@ -284,25 +285,26 @@ void MCControlNAOqi::servo(const bool state)
 				MCNAOqiDCM_.call<void>("startLoop");
 				mc_rtc::log::info("Connected to DCM loop");
 			}
-
-			/* If controller is not running, set joint angle commands to current joint state from encoders */
-			if(!globalController_.running)
-			{
-				std::vector<float> angles;
-				angles.resize(globalController_.robot().refJointOrder().size());
-				for(size_t i = 0; i < globalController_.robot().encoderValues().size(); ++i)
-				{
-					angles[i] = static_cast<float>(globalController_.robot().encoderValues()[i]);
-				}
-				MCNAOqiDCM_.call<void>("setJointAngles", angles);
-			}
-
 			/* Gradually increase stiffness over 1s to prevent initial jerky motion */
 			for(int i = 1; i <= 100; ++i)
 			{
 				MCNAOqiDCM_.call<void>("setStiffness", i / 100.);
 				std::this_thread::sleep_for(std::chrono::milliseconds(10));
 			}
+
+			/* If controller is not running, set joint angle commands to current joint state from encoders */
+			if(!globalController_.running)
+			{
+				// std::vector<float> angles;
+				// angles.resize(globalController_.robot().refJointOrder().size());
+				// for(size_t i = 0; i < globalController_.robot().encoderValues().size(); ++i)
+				// {
+				// 	angles[i] = static_cast<float>(globalController_.robot().encoderValues()[i]);
+				// }
+				MCNAOqiDCM_.call<void>("setJointAngles", default_angles);
+				std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+			}
+
 			servoState_ = true;
 			servoButtonText_ = "Motors OFF";
 			mc_rtc::log::warning("Motors ON");
@@ -311,6 +313,8 @@ void MCControlNAOqi::servo(const bool state)
 		else
 		{ /* Servo OFF */
 			mc_rtc::log::warning("Turning OFF the motors");
+			MCNAOqiDCM_.call<void>("setJointAngles", default_angles);
+			std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 			/* Gradually decrease stiffness over 1s to prevent jerky motion */
 			for(int i = 1; i <= 100; ++i)
 			{
